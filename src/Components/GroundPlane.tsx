@@ -15,7 +15,7 @@ import {
   attribute,
   uniform,
 } from "three/tsl";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { seededRandom } from "three/src/math/MathUtils.js";
 import InstancedBalls from "./InstancedBalls";
 import { useThree } from "@react-three/fiber";
@@ -27,7 +27,8 @@ import { types } from "@theatre/core";
 const SEGMENTS = 55;
 const PLANE_SIZE = 30;
 
-const REPETETION = 6;
+const REPETETION = 8;
+const SPARKLE_COUNT = 800;
 
 const GroundPlane = () => {
   const renderer = useThree((t) => t.renderer);
@@ -115,6 +116,12 @@ const GroundPlane = () => {
     };
   }, []);
 
+  // The first tile renders the real <Sparkles>; the other tiles reuse its
+  // geometry + material so every tile shows the same sparkle pattern.
+  // State (not a plain ref) so the clones re-render once it exists.
+  const [sparkSource, setSparkSource] = useState<THREE.InstancedMesh | null>(
+    null,
+  );
   return (
     <>
       {Array.from({ length: REPETETION }).map((_, i) => {
@@ -141,12 +148,27 @@ const GroundPlane = () => {
               SEGMENTS={SEGMENTS}
               yOffset={groundPlaneOffsets}
             />
-            <Sparkles
-              color={"#fff"}
-              scale={[PLANE_SIZE, PLANE_SIZE, PLANE_SIZE * 1.5]}
-              size={15}
-              count={800}
-            />
+            {i === 0 ? (
+              <Sparkles
+                ref={setSparkSource}
+                color={"#fff"}
+                scale={[PLANE_SIZE, PLANE_SIZE, PLANE_SIZE * 1.5]}
+                size={15}
+                count={SPARKLE_COUNT}
+                frustumCulled={false}
+              />
+            ) : (
+              sparkSource && (
+                <instancedMesh
+                  args={[
+                    sparkSource.geometry,
+                    sparkSource.material,
+                    SPARKLE_COUNT,
+                  ]}
+                  frustumCulled={false}
+                />
+              )
+            )}
           </group>
         );
       })}
