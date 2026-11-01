@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import GroundPlane from "./GroundPlane";
-import { OrbitControls } from "@react-three/drei";
+// import { OrbitControls } from "@react-three/drei";
 import PostProcessing from "./PostProcessing";
 import { Inspector } from "three/examples/jsm/inspector/Inspector.js";
 import { theatreInit } from "../Theatre/init";
