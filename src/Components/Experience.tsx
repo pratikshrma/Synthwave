@@ -6,6 +6,8 @@ import { Inspector } from "three/examples/jsm/inspector/Inspector.js";
 import { theatreInit } from "../Theatre/init";
 import CustomCamera from "./CustomCamera";
 import Sun from "./Sun";
+import Sky from "./Sky";
+import * as THREE from "three/webgpu";
 
 theatreInit();
 
@@ -17,6 +19,7 @@ const Sheel = () => {
       <CustomCamera />
       <GroundPlane />
       <Sun />
+      <Sky />
       <PostProcessing />
     </>
   );
@@ -27,6 +30,7 @@ const Experience = () => {
     <Canvas
       renderer={{
         shadows: "percentage",
+        toneMapping: THREE.NoToneMapping,
       }}
       background="envMap/background.exr"
       onCreated={({ renderer }) => {

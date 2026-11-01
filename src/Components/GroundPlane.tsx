@@ -19,14 +19,15 @@ import { useEffect, useMemo, useRef } from "react";
 import { seededRandom } from "three/src/math/MathUtils.js";
 import InstancedBalls from "./InstancedBalls";
 import { useThree } from "@react-three/fiber";
-import type { Inspector } from "three/examples/jsm/inspector/Inspector.js";
 import remapClamp from "../Helper/remapClamp";
 import { Sparkles } from "@react-three/drei/webgpu";
+import { sheet } from "../Theatre/init";
+import { types } from "@theatre/core";
 
 const SEGMENTS = 55;
 const PLANE_SIZE = 30;
 
-const REPETETION = 4;
+const REPETETION = 6;
 
 const GroundPlane = () => {
   const renderer = useThree((t) => t.renderer);
@@ -35,21 +36,47 @@ const GroundPlane = () => {
   const uLinesColor = useMemo(() => uniform(new THREE.Color("#e5213e")), []);
   const uLinesThickness = useMemo(() => uniform(1.5), []);
 
-  const inspectorElementCreated = useRef(false);
-
   useEffect(() => {
-    if (renderer.inspector && !inspectorElementCreated.current) {
-      const ground = (renderer.inspector as Inspector).createParameters(
-        "Ground",
-      );
-      ground.addColor(uPlaneColor, "value").name("Plane Color");
-      ground.addColor(uLinesColor, "value").name("Lines Color");
-      ground
-        .add(uLinesThickness, "value", 0.1, 10, 0.01)
-        .name("Lines Thickness");
+    const object = sheet.object(
+      "Plane / Texture",
+      {
+        planeColor: types.rgba({
+          r: uPlaneColor.value.r,
+          g: uPlaneColor.value.g,
+          b: uPlaneColor.value.b,
+          a: 1,
+        }),
+        linesColor: types.rgba({
+          r: uLinesColor.value.r,
+          g: uLinesColor.value.g,
+          b: uLinesColor.value.b,
+          a: 1,
+        }),
+        linesThickness: types.number(1.5, {
+          range: [0, 5],
+          nudgeMultiplier: 0.01,
+        }),
+      },
+      { reconfigure: true },
+    );
 
-      inspectorElementCreated.current = true;
-    }
+    const unsubscribe = object.onValuesChange((v) => {
+      uPlaneColor.value.setRGB(
+        v.planeColor.r,
+        v.planeColor.g,
+        v.planeColor.b,
+        THREE.SRGBColorSpace,
+      );
+      uLinesColor.value.setRGB(
+        v.linesColor.r,
+        v.linesColor.g,
+        v.linesColor.b,
+        THREE.SRGBColorSpace,
+      );
+      uLinesThickness.value = v.linesThickness;
+    });
+
+    return () => unsubscribe();
   }, [uPlaneColor, uLinesColor, renderer]);
 
   const groundPlaneOffsets = useMemo(() => {
@@ -84,7 +111,7 @@ const GroundPlane = () => {
     return {
       positionNode,
       colorNode: mix(color(uPlaneColor), color(uLinesColor), lineMask),
-      glowMrt: mrt({ bloomIntensity: lineMask }),
+      glowMrt: mrt({ bloomColor: color(uLinesColor).mul(lineMask).mul(0.1) }),
     };
   }, []);
 
@@ -117,8 +144,8 @@ const GroundPlane = () => {
             <Sparkles
               color={"#fff"}
               scale={[PLANE_SIZE, PLANE_SIZE, PLANE_SIZE * 1.5]}
-              size={10}
-              count={500}
+              size={15}
+              count={800}
             />
           </group>
         );
