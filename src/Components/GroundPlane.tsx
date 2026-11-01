@@ -15,7 +15,7 @@ import {
   attribute,
   uniform,
 } from "three/tsl";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { seededRandom } from "three/src/math/MathUtils.js";
 import InstancedBalls from "./InstancedBalls";
 import { useThree } from "@react-three/fiber";
@@ -27,11 +27,11 @@ import { types } from "@theatre/core";
 const SEGMENTS = 55;
 const PLANE_SIZE = 30;
 
-const REPETETION = 8;
-const SPARKLE_COUNT = 800;
+const REPETETION = 6;
+const SPARKLE_COUNT = 500;
 
 const GroundPlane = () => {
-  const renderer = useThree((t) => t.renderer);
+  const { renderer } = useThree();
 
   const uPlaneColor = useMemo(() => uniform(new THREE.Color("#25072b")), []);
   const uLinesColor = useMemo(() => uniform(new THREE.Color("#e5213e")), []);

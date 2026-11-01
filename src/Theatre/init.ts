@@ -1,4 +1,5 @@
 import { getProject } from "@theatre/core";
+import state from "./synthWave.theatre-project-state.json";
 
 export async function theatreInit() {
   await Promise.all([import("@theatre/studio")]).then(([studioModule]) => {
@@ -13,4 +14,9 @@ export async function theatreInit() {
   });
 }
 
-export const sheet = getProject("synthWave").sheet("synthSheet");
+const project = getProject("synthWave", { state });
+export const sheet = project.sheet("synthSheet");
+
+project.ready.then(() => {
+  sheet.sequence.play({ iterationCount: Infinity });
+});

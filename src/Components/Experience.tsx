@@ -9,7 +9,7 @@ import Sun from "./Sun";
 import Sky from "./Sky";
 import * as THREE from "three/webgpu";
 
-theatreInit();
+if (import.meta.env.DEV) theatreInit();
 
 const Sheel = () => {
   return (
